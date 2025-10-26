@@ -24,7 +24,7 @@ void USettingsViewModel::SaveSettings() const
 	UMyProjectSettings* Settings = UMyProjectSettings::Get();
 	if (!Settings)
 	{
-		UE_LOG(LogTemp, Error, TEXT("SettingsViewModel::SaveSettings - Failed to get UMyGameUserSettings!"));
+		UE_LOG(LogTemp, Error, TEXT("SettingsViewModel::SaveSettings - Failed to get UMyProjectSettings!"));
 		return;
 	}
 	
@@ -46,7 +46,7 @@ void USettingsViewModel::SetSpawnObjectColor(const FLinearColor& InColor)
 	OnSpawnColorChanged.Broadcast(SpawnObjectColor);
 }
 
-void USettingsViewModel::SetSpawnObjectScale(float InScale)
+void USettingsViewModel::SetSpawnObjectScale(const float InScale)
 {
 	if (FMath::IsNearlyEqual(SpawnObjectScale, InScale))
 	{
@@ -71,7 +71,7 @@ void USettingsViewModel::SetSelectedSpawnType(const FString& InString)
 	}
 }
 
-void USettingsViewModel::SetSpawnObjectType(ESpawnObjectType InType)
+void USettingsViewModel::SetSpawnObjectType(const ESpawnObjectType InType)
 {
 	if (SpawnObjectType == InType || InType >= ESpawnObjectType::MAX)
 	{

@@ -1,7 +1,7 @@
 ﻿#include "MainViewModel.h"
 #include "InteractiveObjectManagerSubsystem.h"
 
-void UMainViewModel::Initialize(UInteractiveObjectManagerSubsystem* InSubsystem, USettingsViewModel* InSettingsVM)
+void UMainViewModel::Initialize(UInteractiveObjectManagerSubsystem* InSubsystem)
 {
 	ManagerSubsystem = InSubsystem;
 }
@@ -11,6 +11,14 @@ void UMainViewModel::RequestSpawnObject() const
 	if (ManagerSubsystem)
 	{
 		ManagerSubsystem->SpawnObjectInWorld(SelectedSpawnObjectType);
+	}
+}
+
+void UMainViewModel::RequestDeleteSelectedObject() const
+{
+	if (ManagerSubsystem)
+	{
+		ManagerSubsystem->DeleteSelectedObject();
 	}
 }
 
@@ -41,7 +49,7 @@ void UMainViewModel::SetSelectedObjectColor(const FLinearColor& InColor)
 	}
 }
 
-void UMainViewModel::SetSelectedObjectScale(float InScale)
+void UMainViewModel::SetSelectedObjectScale(const float InScale)
 {
 	if (FMath::IsNearlyEqual(SelectedObjectScale, InScale))
 	{
@@ -75,15 +83,14 @@ void UMainViewModel::UpdateSelectedObject(AInteractiveObjectBase* NewSelectedObj
 
 	if (SelectedObject)
 	{
-		SelectedObjectColor = SelectedObject->Color;
-		SelectedObjectScale = SelectedObject->Scale;
+		SelectedObjectColor = SelectedObject->GetColor();
+		SelectedObjectScale = SelectedObject->GetScale();
 
 		OnSelectedColorChanged.Broadcast(SelectedObjectColor);
 		OnSelectedScaleChanged.Broadcast(SelectedObjectScale);
 	}
 	else
 	{
-		// Если ничего не выбрано, сбрасываем и уведомляем
 		SelectedObjectColor = FLinearColor::Black;
 		SelectedObjectScale = 0.0f;
 		OnSelectedColorChanged.Broadcast(SelectedObjectColor);

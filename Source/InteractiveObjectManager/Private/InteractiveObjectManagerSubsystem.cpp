@@ -13,44 +13,39 @@ void UInteractiveObjectManagerSubsystem::Initialize(FSubsystemCollectionBase& Co
 	MainViewModel = NewObject<UMainViewModel>(this);
 	SettingsViewModel = NewObject<USettingsViewModel>(this);
 
-	MainViewModel->Initialize(this, SettingsViewModel); // Даем MainVM ссылку на нас
+	MainViewModel->Initialize(this);
 	
 	SettingsViewModel->LoadSettings();
 }
 
-void UInteractiveObjectManagerSubsystem::SpawnObjectInWorld(ESpawnObjectType SelectedSpawnObjectType)
+void UInteractiveObjectManagerSubsystem::SpawnObjectInWorld(const ESpawnObjectType SelectedSpawnObjectType)
 {
-	const UMyProjectSettings* SettingsObject = UMyProjectSettings::Get();
-	UClass* ClassToSpawn = SettingsObject->GetClassToSpawn(SelectedSpawnObjectType);
+	const UInteractiveObjectSettings* InteractiveObjectSettings = GetDefault<UInteractiveObjectSettings>();
+	if (!InteractiveObjectSettings)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UInteractiveObjectManagerSubsystem::SpawnObjectInWorld - Failed to get Interactive Object Project Settings!"));
+		return;
+	}
+
+	UClass* ClassToSpawn = InteractiveObjectSettings->GetClassToSpawn(SelectedSpawnObjectType);
 
 	if (!ClassToSpawn)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to load ClassToSpawn from .ini!"));
+		UE_LOG(LogTemp, Error, TEXT("UInteractiveObjectManagerSubsystem::SpawnObjectInWorld - Failed to load ClassToSpawn from .ini!"));
 		return;
 	}
-	
-	UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-	const APlayerController* PC = World->GetFirstPlayerController();
-	if (!PC)
-	{
-		return;
-	}
-	const APawn* Pawn = PC->GetPawn();
-	if (!Pawn)
-	{
-		return;
-	}	
 
-	const FVector SpawnLocation = Pawn->GetActorLocation() + Pawn->GetActorForwardVector() * 250.0f;
-	
-	if (AInteractiveObjectBase* NewObject = World->SpawnActor<AInteractiveObjectBase>(ClassToSpawn, SpawnLocation, FRotator::ZeroRotator))
+	const UMyProjectSettings* Settings = UMyProjectSettings::Get();
+	if (!Settings)
 	{
-		NewObject->Color = SettingsObject->DefaultSpawnObjectColor;
-		NewObject->Scale = SettingsObject->DefaultSpawnObjectScale;
+		UE_LOG(LogTemp, Error, TEXT("UInteractiveObjectManagerSubsystem::SpawnObjectInWorld - Failed to get UMyGameUserSettings!"));
+		return;
+	}
+
+	if (AInteractiveObjectBase* NewObject = SpawnActor(ClassToSpawn))
+	{
+		NewObject->SetColor(Settings->DefaultSpawnObjectColor);
+		NewObject->SetScale(Settings->DefaultSpawnObjectScale);
 		NewObject->UpdateVisuals();
 		
 		SpawnedObjectsList.Add(NewObject);
@@ -61,6 +56,23 @@ void UInteractiveObjectManagerSubsystem::SpawnObjectInWorld(ESpawnObjectType Sel
 	}
 }
 
+void UInteractiveObjectManagerSubsystem::DeleteSelectedObject()
+{
+	if (!CurrentSelectedObject || !MainViewModel)
+	{
+		return;
+	}
+
+	AInteractiveObjectBase* ObjectToDelete = CurrentSelectedObject;
+
+	SpawnedObjectsList.Remove(ObjectToDelete);
+	MainViewModel->UpdateSpawnedObjectsList(SpawnedObjectsList);
+
+	SetSelectedObject(nullptr);
+
+	ObjectToDelete->Destroy();
+}
+
 void UInteractiveObjectManagerSubsystem::SetSelectedObject(AInteractiveObjectBase* NewSelection)
 {
 	if (CurrentSelectedObject == NewSelection || !MainViewModel)
@@ -68,21 +80,8 @@ void UInteractiveObjectManagerSubsystem::SetSelectedObject(AInteractiveObjectBas
 		return;
 	}
 
-	// Снимаем выделение со старого
-	if (CurrentSelectedObject)
-	{
-		CurrentSelectedObject->OnDeselected();
-	}
-
 	CurrentSelectedObject = NewSelection;
 
-	// Выделяем новый
-	if (CurrentSelectedObject)
-	{
-		CurrentSelectedObject->OnSelected();
-	}
-
-	// Сообщаем ViewModel (и UI) об изменении
 	MainViewModel->UpdateSelectedObject(CurrentSelectedObject);
 }
 
@@ -93,19 +92,42 @@ void UInteractiveObjectManagerSubsystem::UpdateSelectedActorColor(const FLinearC
 		return;
 	}
 
-	CurrentSelectedObject->Color = InColor;
+	CurrentSelectedObject->SetColor(InColor);
 
 	CurrentSelectedObject->UpdateVisuals();
 }
-void UInteractiveObjectManagerSubsystem::UpdateSelectedActorScale(float InScale) const
+void UInteractiveObjectManagerSubsystem::UpdateSelectedActorScale(const float InScale) const
 {
 	if (!CurrentSelectedObject)
 	{
 		return;
 	}
 
-	CurrentSelectedObject->Scale = InScale;
+	CurrentSelectedObject->SetScale(InScale);
 
 	CurrentSelectedObject->UpdateVisuals();
 }
 
+AInteractiveObjectBase* UInteractiveObjectManagerSubsystem::SpawnActor(UClass* ClassToSpawn) const
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return nullptr;
+	}
+	const APlayerController* PC = World->GetFirstPlayerController();
+	if (!PC)
+	{
+		return nullptr;
+	}
+	const APawn* Pawn = PC->GetPawn();
+	if (!Pawn)
+	{
+		return nullptr;
+	}	
+
+	const FVector SpawnLocation = Pawn->GetActorLocation() + Pawn->GetActorForwardVector() * 250.0f;
+	AInteractiveObjectBase* NewObject = World->SpawnActor<AInteractiveObjectBase>(ClassToSpawn, SpawnLocation, FRotator::ZeroRotator);
+
+	return NewObject;
+}

@@ -1,16 +1,13 @@
 ﻿#pragma once
 
 #include "InteractiveObjectBase.h"
-#include "MyProjectSettings.h"
+#include "InteractiveObjectSettings.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "InteractiveObjectManagerSubsystem.generated.h"
 
-class UInteractiveObjectSettings;
 class UMainViewModel;
 class USettingsViewModel;
-/**
- * 
- */
+
 UCLASS()
 class INTERACTIVEOBJECTMANAGER_API UInteractiveObjectManagerSubsystem : public UWorldSubsystem
 {
@@ -18,8 +15,9 @@ class INTERACTIVEOBJECTMANAGER_API UInteractiveObjectManagerSubsystem : public U
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	
+
 	void SpawnObjectInWorld(ESpawnObjectType SelectedSpawnObjectType);
+	void DeleteSelectedObject();
 	
 	UFUNCTION(BlueprintPure, Category = "Manager")
 	UMainViewModel* GetMainViewModel() const { return MainViewModel; }
@@ -30,6 +28,9 @@ public:
 	void SetSelectedObject(AInteractiveObjectBase* NewSelection);
 	void UpdateSelectedActorColor(const FLinearColor& InColor) const;
 	void UpdateSelectedActorScale(float InScale) const;
+
+private:
+	AInteractiveObjectBase* SpawnActor(UClass* ClassToSpawn) const;
 
 protected:
 	UPROPERTY(Transient)

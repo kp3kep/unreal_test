@@ -33,7 +33,6 @@ public:
 
 	void SetSpawnObjectType(ESpawnObjectType InType);
 
-
 	UPROPERTY(BlueprintAssignable, Category = "Settings|Events")
 	FOnSpawnTypeChanged OnSpawnTypeChanged;
 	

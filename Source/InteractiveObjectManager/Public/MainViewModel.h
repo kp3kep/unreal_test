@@ -17,10 +17,13 @@ class INTERACTIVEOBJECTMANAGER_API UMainViewModel : public UObject
 	GENERATED_BODY()
 
 public:
-	void Initialize(UInteractiveObjectManagerSubsystem* InSubsystem, USettingsViewModel* InSettingsVM);
+	void Initialize(UInteractiveObjectManagerSubsystem* InSubsystem);
 
 	UFUNCTION(BlueprintCallable, Category = "Main")
 	void RequestSpawnObject() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Main")
+	void RequestDeleteSelectedObject() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Main")
 	void SetSelectedObjectFromUI(AInteractiveObjectBase* ObjectToSelect) const;
@@ -34,11 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Main|Selection")
 	void SetSelectedObjectScale(float InScale);
 
-	// --- НОВОЕ: Функции, вызываемые из Subsystem для обновления ---
 	void UpdateSpawnedObjectsList(const TArray<AInteractiveObjectBase*>& UpdatedObjects);
 	void UpdateSelectedObject(AInteractiveObjectBase* NewSelectedObject);
 
-	// --- НОВОЕ: Геттеры для UI ---
 	UFUNCTION(BlueprintPure, Category="Main")
 	const TArray<AInteractiveObjectBase*>& GetSpawnedObjects() const { return SpawnedObjects; }
 
@@ -51,7 +52,6 @@ public:
 	UFUNCTION(BlueprintPure, Category="Main|Selection")
 	float GetSelectedObjectScale() const { return SelectedObjectScale; }
 
-	// --- НОВОЕ: Делегаты для UI ---
 	UPROPERTY(BlueprintAssignable, Category = "Main|Events")
 	FOnSpawnedObjectsChanged OnSpawnedObjectsChanged;
 
@@ -83,7 +83,4 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<UInteractiveObjectManagerSubsystem> ManagerSubsystem;
-
-	UPROPERTY()
-	TObjectPtr<USettingsViewModel> SettingsViewModel;
 };

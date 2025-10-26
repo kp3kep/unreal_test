@@ -8,8 +8,6 @@ AInteractiveObjectBase::AInteractiveObjectBase()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 
 	RootComponent = MeshComponent;
-
-	MeshComponent->SetRenderCustomDepth(true);
 }
 
 void AInteractiveObjectBase::OnConstruction(const FTransform& Transform)
@@ -37,15 +35,4 @@ void AInteractiveObjectBase::UpdateVisuals()
 		DynamicMaterialInstance->SetVectorParameterValue(ColorParameterName, Color);
 	}
 }
-
-void AInteractiveObjectBase::OnSelected() const
-{
-	// MeshComponent->SetCustomDepthStencilValue(255);
-}
-
-void AInteractiveObjectBase::OnDeselected() const
-{
-	// MeshComponent->SetCustomDepthStencilValue(0);
-}
-
 

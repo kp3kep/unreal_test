@@ -19,7 +19,8 @@ public class InteractiveObjectManager : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "Slate",
-                "SlateCore"
+                "SlateCore",
+                "DeveloperSettings",
             }
         );
     }
