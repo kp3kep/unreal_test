@@ -6,8 +6,8 @@
 #include "MainViewModel.generated.h"
 
 class AInteractiveObjectBase;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnedObjectsChanged, const TArray<AInteractiveObjectBase*>&, NewObjects);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedObjectChanged, AInteractiveObjectBase*, NewSelection);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnedObjectsChanged, const TArray<AActor*>&, NewObjects);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedObjectChanged, AActor*, NewSelection);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedColorChanged, FLinearColor, NewColor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedScaleChanged, float, NewScale);
 
@@ -26,7 +26,7 @@ public:
 	void RequestDeleteSelectedObject() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Main")
-	void SetSelectedObjectFromUI(AInteractiveObjectBase* ObjectToSelect) const;
+	void SetSelectedObjectFromUI(AActor* ObjectToSelect) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Main")
 	void SetSelectedSpawnObjectType(const FString& NewType);
@@ -37,14 +37,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Main|Selection")
 	void SetSelectedObjectScale(float InScale);
 
-	void UpdateSpawnedObjectsList(const TArray<AInteractiveObjectBase*>& UpdatedObjects);
-	void UpdateSelectedObject(AInteractiveObjectBase* NewSelectedObject);
+	void UpdateSpawnedObjectsList(const TArray<AActor*>& UpdatedObjects);
+	void UpdateSelectedObject(AActor* NewSelectedObject);
 
 	UFUNCTION(BlueprintPure, Category="Main")
-	const TArray<AInteractiveObjectBase*>& GetSpawnedObjects() const { return SpawnedObjects; }
+	const TArray<AActor*>& GetSpawnedObjects() const { return SpawnedObjects; }
 
 	UFUNCTION(BlueprintPure, Category="Main")
-	AInteractiveObjectBase* GetSelectedObject() const { return SelectedObject; }
+	AActor* GetSelectedObject() const { return SelectedObject.Get(); }
 
 	UFUNCTION(BlueprintPure, Category="Main|Selection")
 	FLinearColor GetSelectedObjectColor() const { return SelectedObjectColor; }
@@ -66,10 +66,10 @@ public:
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category="Main")
-	TArray<AInteractiveObjectBase*> SpawnedObjects;
+	TArray<TObjectPtr<AActor>> SpawnedObjects;
 
 	UPROPERTY(BlueprintReadWrite, Category="Main")
-	AInteractiveObjectBase* SelectedObject;
+	TObjectPtr<AActor> SelectedObject;
 
 	UPROPERTY(BlueprintReadOnly, Category="Main", meta=(AllowPrivateAccess="true"))
 	ESpawnObjectType SelectedSpawnObjectType;

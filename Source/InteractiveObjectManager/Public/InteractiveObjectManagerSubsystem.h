@@ -18,14 +18,16 @@ public:
 
 	void SpawnObjectInWorld(ESpawnObjectType SelectedSpawnObjectType);
 	void DeleteSelectedObject();
-	
+
 	UFUNCTION(BlueprintPure, Category = "Manager")
 	UMainViewModel* GetMainViewModel() const { return MainViewModel; }
-	
+
 	UFUNCTION(BlueprintPure, Category = "Manager")
 	USettingsViewModel* GetSettingsViewModel() const { return SettingsViewModel; }
 
-	void SetSelectedObject(AInteractiveObjectBase* NewSelection);
+	UFUNCTION(BlueprintCallable, Category = "Manager")
+	void SetSelectedObject(AActor* NewSelection);
+
 	void UpdateSelectedActorColor(const FLinearColor& InColor) const;
 	void UpdateSelectedActorScale(float InScale) const;
 
@@ -38,10 +40,10 @@ protected:
 
 	UPROPERTY(Transient)
 	TObjectPtr<USettingsViewModel> SettingsViewModel;
-	
-	UPROPERTY(Transient)
-	TArray<AInteractiveObjectBase*> SpawnedObjectsList;
 
 	UPROPERTY(Transient)
-	TObjectPtr<AInteractiveObjectBase> CurrentSelectedObject;
+	TArray<TObjectPtr<AActor>> SpawnedObjectsList;
+
+	UPROPERTY(Transient)
+	TObjectPtr<AActor> CurrentSelectedObject;
 };

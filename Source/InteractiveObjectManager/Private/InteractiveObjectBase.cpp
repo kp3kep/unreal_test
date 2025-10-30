@@ -10,17 +10,10 @@ AInteractiveObjectBase::AInteractiveObjectBase()
 	RootComponent = MeshComponent;
 }
 
-void AInteractiveObjectBase::OnConstruction(const FTransform& Transform)
+void AInteractiveObjectBase::UpdateColor_Implementation(const FLinearColor& InColor)
 {
-	Super::OnConstruction(Transform);
-
-	UpdateVisuals();
-}
-
-void AInteractiveObjectBase::UpdateVisuals()
-{
-	MeshComponent->SetRelativeScale3D(FVector(Scale));
-
+	SetColor(InColor);
+	
 	if (!DynamicMaterialInstance)
 	{
 		if (UMaterialInterface* Material = MeshComponent->GetMaterial(0))
@@ -34,5 +27,12 @@ void AInteractiveObjectBase::UpdateVisuals()
 	{
 		DynamicMaterialInstance->SetVectorParameterValue(ColorParameterName, Color);
 	}
+}
+
+void AInteractiveObjectBase::UpdateScale_Implementation(const float InScale)
+{
+	SetScale(InScale);
+	
+	MeshComponent->SetRelativeScale3D(FVector(Scale));
 }
 

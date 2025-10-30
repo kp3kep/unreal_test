@@ -22,7 +22,7 @@ void UMainViewModel::RequestDeleteSelectedObject() const
 	}
 }
 
-void UMainViewModel::SetSelectedObjectFromUI(AInteractiveObjectBase* ObjectToSelect) const
+void UMainViewModel::SetSelectedObjectFromUI(AActor* ObjectToSelect) const
 {
 	if (ManagerSubsystem)
 	{
@@ -38,7 +38,10 @@ void UMainViewModel::SetSelectedSpawnObjectType(const FString& NewType)
 
 void UMainViewModel::SetSelectedObjectColor(const FLinearColor& InColor)
 {
-	if (SelectedObjectColor == InColor) return; 
+	if (SelectedObjectColor == InColor)
+	{
+		return;
+	} 
 
 	SelectedObjectColor = InColor; 
 	OnSelectedColorChanged.Broadcast(SelectedObjectColor); 
@@ -65,13 +68,13 @@ void UMainViewModel::SetSelectedObjectScale(const float InScale)
 	}
 }
 
-void UMainViewModel::UpdateSpawnedObjectsList(const TArray<AInteractiveObjectBase*>& UpdatedObjects)
+void UMainViewModel::UpdateSpawnedObjectsList(const TArray<AActor*>& UpdatedObjects)
 {
 	SpawnedObjects = UpdatedObjects;
 	OnSpawnedObjectsChanged.Broadcast(SpawnedObjects);
 }
 
-void UMainViewModel::UpdateSelectedObject(AInteractiveObjectBase* NewSelectedObject)
+void UMainViewModel::UpdateSelectedObject(AActor* NewSelectedObject)
 {
 	if (SelectedObject == NewSelectedObject)
 	{
@@ -81,10 +84,10 @@ void UMainViewModel::UpdateSelectedObject(AInteractiveObjectBase* NewSelectedObj
 	SelectedObject = NewSelectedObject;
 	OnSelectedObjectChanged.Broadcast(SelectedObject);
 
-	if (SelectedObject)
+	if (SelectedObject && SelectedObject->Implements<UInteractiveObjectInterface>())
 	{
-		SelectedObjectColor = SelectedObject->GetColor();
-		SelectedObjectScale = SelectedObject->GetScale();
+		SelectedObjectColor = IInteractiveObjectInterface::Execute_GetColor(SelectedObject);
+		SelectedObjectScale = IInteractiveObjectInterface::Execute_GetScale(SelectedObject);
 
 		OnSelectedColorChanged.Broadcast(SelectedObjectColor);
 		OnSelectedScaleChanged.Broadcast(SelectedObjectScale);
@@ -93,6 +96,7 @@ void UMainViewModel::UpdateSelectedObject(AInteractiveObjectBase* NewSelectedObj
 	{
 		SelectedObjectColor = FLinearColor::Black;
 		SelectedObjectScale = 0.0f;
+
 		OnSelectedColorChanged.Broadcast(SelectedObjectColor);
 		OnSelectedScaleChanged.Broadcast(SelectedObjectScale);
 	}

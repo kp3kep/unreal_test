@@ -44,9 +44,8 @@ void UInteractiveObjectManagerSubsystem::SpawnObjectInWorld(const ESpawnObjectTy
 
 	if (AInteractiveObjectBase* NewObject = SpawnActor(ClassToSpawn))
 	{
-		NewObject->SetColor(Settings->DefaultSpawnObjectColor);
-		NewObject->SetScale(Settings->DefaultSpawnObjectScale);
-		NewObject->UpdateVisuals();
+		IInteractiveObjectInterface::Execute_UpdateColor(NewObject, Settings->DefaultSpawnObjectColor);
+		IInteractiveObjectInterface::Execute_UpdateScale(NewObject, Settings->DefaultSpawnObjectScale);
 		
 		SpawnedObjectsList.Add(NewObject);
 		if (MainViewModel)
@@ -63,7 +62,7 @@ void UInteractiveObjectManagerSubsystem::DeleteSelectedObject()
 		return;
 	}
 
-	AInteractiveObjectBase* ObjectToDelete = CurrentSelectedObject;
+	AActor* ObjectToDelete = CurrentSelectedObject;
 
 	SpawnedObjectsList.Remove(ObjectToDelete);
 	MainViewModel->UpdateSpawnedObjectsList(SpawnedObjectsList);
@@ -73,7 +72,7 @@ void UInteractiveObjectManagerSubsystem::DeleteSelectedObject()
 	ObjectToDelete->Destroy();
 }
 
-void UInteractiveObjectManagerSubsystem::SetSelectedObject(AInteractiveObjectBase* NewSelection)
+void UInteractiveObjectManagerSubsystem::SetSelectedObject(AActor* NewSelection)
 {
 	if (CurrentSelectedObject == NewSelection || !MainViewModel)
 	{
@@ -87,25 +86,18 @@ void UInteractiveObjectManagerSubsystem::SetSelectedObject(AInteractiveObjectBas
 
 void UInteractiveObjectManagerSubsystem::UpdateSelectedActorColor(const FLinearColor& InColor) const
 {
-	if (!CurrentSelectedObject)
+	if (CurrentSelectedObject && CurrentSelectedObject->Implements<UInteractiveObjectInterface>())
 	{
-		return;
+		IInteractiveObjectInterface::Execute_UpdateColor(CurrentSelectedObject, InColor);
 	}
-
-	CurrentSelectedObject->SetColor(InColor);
-
-	CurrentSelectedObject->UpdateVisuals();
 }
+
 void UInteractiveObjectManagerSubsystem::UpdateSelectedActorScale(const float InScale) const
 {
-	if (!CurrentSelectedObject)
+	if (CurrentSelectedObject && CurrentSelectedObject->Implements<UInteractiveObjectInterface>())
 	{
-		return;
+		IInteractiveObjectInterface::Execute_UpdateScale(CurrentSelectedObject, InScale);
 	}
-
-	CurrentSelectedObject->SetScale(InScale);
-
-	CurrentSelectedObject->UpdateVisuals();
 }
 
 AInteractiveObjectBase* UInteractiveObjectManagerSubsystem::SpawnActor(UClass* ClassToSpawn) const
