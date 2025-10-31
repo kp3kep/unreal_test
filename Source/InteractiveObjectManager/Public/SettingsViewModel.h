@@ -9,7 +9,14 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnTypeChanged, ESpawnObjectTyp
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnColorChanged, FLinearColor, NewColor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSpawnScaleChanged, float, NewScale);
 
-
+/**
+ * @class USettingsViewModel
+ * @brief A view model class responsible for managing settings related to object spawning.
+ *
+ * The USettingsViewModel class provides functionality for loading, saving,
+ * and managing settings specific to object spawning, such as object color,
+ * scale, and type. It also emits events when these properties change.
+ */
 UCLASS(Blueprintable)
 class INTERACTIVEOBJECTMANAGER_API USettingsViewModel : public UObject
 {
